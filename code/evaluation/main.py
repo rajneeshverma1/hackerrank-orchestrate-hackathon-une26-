@@ -1,11 +1,10 @@
-import os
 from pathlib import Path
 import sys
 
 # Add parent dir to path to import code modules
 sys.path.append(str(Path(__file__).parent.parent.resolve()))
 
-from utils import load_csv, save_csv
+from utils import load_csv
 from pipeline import process_claim
 from evaluation.metrics import calculate_accuracy, generate_report
 

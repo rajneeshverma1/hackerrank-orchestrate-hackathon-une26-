@@ -2,8 +2,8 @@ import os
 import json
 from pathlib import Path
 
-from .utils import load_csv, save_csv
-from .pipeline import process_claim
+from utils import load_csv, save_csv
+from pipeline import process_claim
 
 def prepare_history(history_data):
     # Returns a dictionary: user_id -> string summary

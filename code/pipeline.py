@@ -2,9 +2,9 @@ import os
 from typing import Dict, Any
 from openai import OpenAI
 
-from .utils import encode_image
-from .models import ClaimPrediction
-from .prompts import SYSTEM_PROMPT, build_user_prompt
+from utils import encode_image
+from models import ClaimPrediction
+from prompts import SYSTEM_PROMPT, build_user_prompt
 
 # Assuming OPENAI_API_KEY is set in environment
 client = OpenAI()

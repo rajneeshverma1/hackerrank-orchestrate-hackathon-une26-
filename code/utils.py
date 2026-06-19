@@ -1,6 +1,5 @@
 import base64
 import csv
-from pathlib import Path
 from typing import List, Dict, Any
 
 def encode_image(image_path: str) -> str:

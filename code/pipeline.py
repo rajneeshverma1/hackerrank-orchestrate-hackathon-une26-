@@ -51,7 +51,7 @@ def process_claim(row: Dict[str, str], user_history_dict: Dict[str, str], requir
     
     try:
         completion = client.beta.chat.completions.parse(
-            model="gpt-4o",
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
             messages=messages,
             response_format=ClaimPrediction,
             temperature=0.0

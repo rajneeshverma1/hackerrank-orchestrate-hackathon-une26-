@@ -5,3 +5,5 @@ __pycache__/
 .DS_Store
 output.csv
 code.zip
+.DS_Store
+final_generation.log

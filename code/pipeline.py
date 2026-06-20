@@ -49,16 +49,38 @@ def process_claim(row: Dict[str, str], user_history_dict: Dict[str, str], requir
             
     messages.append({"role": "user", "content": user_content})
     
+    import time
+    prediction = None
+    max_retries = 5
+    backoff_time = 2
+    
+    for attempt in range(max_retries):
+        try:
+            completion = client.beta.chat.completions.parse(
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                messages=messages,
+                response_format=ClaimPrediction,
+                temperature=0.0
+            )
+            prediction = completion.choices[0].message.parsed
+            break
+        except Exception as e:
+            err_msg = str(e)
+            is_rate_limit = "429" in err_msg or "rate limit" in err_msg.lower() or "too many requests" in err_msg.lower()
+            is_server_error = "500" in err_msg or "502" in err_msg or "503" in err_msg or "504" in err_msg or "timeout" in err_msg.lower()
+            
+            if (is_rate_limit or is_server_error) and attempt < max_retries - 1:
+                sleep_sec = backoff_time ** attempt
+                print(f"API issue (Rate Limit / Server Error) on attempt {attempt+1}/{max_retries}: {e}. Sleeping for {sleep_sec}s...")
+                time.sleep(sleep_sec)
+                continue
+            else:
+                print(f"Failed to call model on attempt {attempt+1}/{max_retries}: {e}")
+                raise e
+
     try:
-        completion = client.beta.chat.completions.parse(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
-            messages=messages,
-            response_format=ClaimPrediction,
-            temperature=0.0
-        )
-        prediction = completion.choices[0].message.parsed
-        
         result = {
+
             'user_id': user_id,
             'image_paths': image_paths_raw,
             'user_claim': user_claim,

@@ -1,22 +1,23 @@
-# Evaluation Report: Operational Analysis
+# Evaluation Report
 
-## Usage & Scale Metrics
-- **Approximate number of model calls:** ~50 model calls (44 claims in the test dataset `claims.csv` and 5 in the sample dataset `sample_claims.csv`).
-- **Number of images processed:** ~55-60 images (some claims contain multiple images).
-- **Approximate input/output token usage:** 
-  - **Input:** ~1,600 tokens per call (~500 text tokens for the prompt, ~1,100 tokens for the base64-encoded image). Total: ~80,000 input tokens.
-  - **Output:** ~100 tokens per call (for the structured JSON response). Total: ~5,000 output tokens.
+## Metrics on sample_claims.csv
 
-## Cost & Latency
-- **Approximate cost:** Using Groq's high-speed Llama 4 Vision models (e.g. `meta-llama/llama-4-scout-17b-16e-instruct`), the pricing is roughly $0.11 per 1M input tokens and $0.34 per 1M output tokens. 
-  - Input Cost: $0.0088
-  - Output Cost: $0.0017
-  - **Total Cost:** ~$0.01 for the entire test set.
-- **Approximate latency/runtime:** ~1.5 to 2 seconds per claim on Groq. Total sequential runtime for the full 44-row test set is roughly **60 to 90 seconds**.
+- **Total Claims Evaluated**: 20
+- **evidence_standard_met Accuracy**: 80.00%
+- **claim_status Accuracy**: 60.00%
+- **issue_type Accuracy**: 60.00%
+- **object_part Accuracy**: 80.00%
+- **valid_image Accuracy**: 85.00%
+- **severity Accuracy**: 50.00%
 
-## Engineering Considerations (TPM/RPM & Strategies)
-- **Rate Limiting & Concurrency:** The current pipeline implements sequential processing. While batching or concurrent async requests (`asyncio.gather`) would reduce total runtime to <5 seconds, sequential processing was chosen to strictly respect Groq's aggressive Requests-Per-Minute (RPM) free-tier rate limits and avoid HTTP 429 errors.
-- **Production Enhancements:**
-  - **Caching:** In a production setting, hashing the image and storing the resulting LLM JSON output in a Redis cache would prevent redundant API calls for duplicate image uploads.
-  - **Retries:** We rely on basic try/except blocks. A production implementation would use a library like `tenacity` for exponential backoff retries when encountering transient network or API limit errors.
-  - **Batching:** If enterprise rate limits are available, we would process claims in batches of 5-10 using semaphores to maximize throughput.
+## Strategy Used
+- **Model**: Groq Llama 4 Vision (meta-llama/llama-4-scout-17b-16e-instruct) with structured JSON outputs.
+- **Prompting**: Object-specific instructions, injecting user history and evidence requirements.
+
+## Operational Analysis
+- **Model Calls**: 1 call per claim.
+- **Token Usage**: ~500 input text tokens, plus image token encoding costs (~1000 tokens per image). Output ~150 tokens.
+- **Images Processed**: Depends on the claim, encoded as base64 and compressed to max 1024x1024 to save tokens and avoid payload limits.
+- **Cost Estimate**: At $0.11/M input and $0.34/M output for Llama 4, cost is roughly $0.0002 per claim (approx. $0.01 for the entire dataset).
+- **Latency**: ~1.5 to 2 seconds per claim.
+- **Rate Limits**: Synchronous processing ensures we don't hit RPM/TPM limits on standard tiers, though batching could speed this up for larger datasets.

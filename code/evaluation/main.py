@@ -50,12 +50,16 @@ def main():
     
     results = []
     total = len(sample_data)
+    import time
     
     print(f"Evaluating {total} sample claims...")
     for idx, row in enumerate(sample_data):
         print(f"[{idx+1}/{total}] Processing sample {row['user_id']}...")
         result = process_claim(row, user_history_dict, requirements_dict, str(repo_root))
         results.append(result)
+        if idx < total - 1:
+            time.sleep(1.5)
+
         
     print("Calculating metrics...")
     metrics = calculate_accuracy(results, sample_data)

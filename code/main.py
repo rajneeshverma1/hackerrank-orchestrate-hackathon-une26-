@@ -47,12 +47,37 @@ def main():
     
     results = []
     total = len(claims_data)
+    import time
     
+    existing_results = {}
+    if output_file.exists():
+        try:
+            old_data = load_csv(str(output_file))
+            for old_row in old_data:
+                uid = old_row.get("user_id")
+                reason = old_row.get("evidence_standard_met_reason", "")
+                justification = old_row.get("claim_status_justification", "")
+                if uid and "Error" not in reason and "Processing failed" not in justification:
+                    existing_results[uid] = old_row
+            print(f"Found {len(existing_results)} valid existing predictions in output.csv. Resuming...")
+        except Exception as e:
+            print(f"Could not load output.csv for resuming: {e}")
+
     print(f"Processing {total} claims...")
     for idx, row in enumerate(claims_data):
-        print(f"[{idx+1}/{total}] Processing user {row['user_id']}...")
+        uid = row['user_id']
+        if uid in existing_results:
+            print(f"[{idx+1}/{total}] Skipping user {uid} (already successfully processed)...")
+            results.append(existing_results[uid])
+            continue
+            
+        print(f"[{idx+1}/{total}] Processing user {uid}...")
         result = process_claim(row, user_history_dict, requirements_dict, str(repo_root))
         results.append(result)
+        if idx < total - 1:
+            time.sleep(1.5)
+
+
         
     fieldnames = [
         "user_id", "image_paths", "user_claim", "claim_object",

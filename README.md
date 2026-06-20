@@ -95,6 +95,12 @@ Suggested conventions:
 - Put evaluation code under `code/evaluation/` or an `evaluation/` folder included in your final `code.zip`.
 - Write final predictions to `output.csv`.
 
+### Key System Optimizations
+- **Image Compression:** Large images in the dataset are automatically compressed to at most 1024x1024 to stay within VLM request limits.
+- **Retry Mechanism:** The pipeline features robust exponential backoff handling to retry on 429 Rate Limit or 5xx Server errors.
+- **Prediction Resuming:** If predictions are interrupted (e.g. daily token limits), running `code/main.py` again will automatically resume and skip already successfully processed rows in `output.csv`.
+
+
 ---
 
 ## Quickstart

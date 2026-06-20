@@ -2,7 +2,13 @@ from pydantic import BaseModel, Field
 from typing import List, Literal
 
 class ClaimPrediction(BaseModel):
+    """
+    Pydantic schema representing the structured outputs required for 
+    HackerRank Orchestrate damage claim verification. Matches the output 
+    schema specification detailed in problem_statement.md.
+    """
     evidence_standard_met: bool = Field(description="True if the image set is sufficient to evaluate the claim; otherwise false")
+
     evidence_standard_met_reason: str = Field(description="Short reason for the evidence decision")
     
     risk_flags: List[Literal[

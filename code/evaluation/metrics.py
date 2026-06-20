@@ -48,15 +48,15 @@ def generate_report(metrics: Dict[str, float], total_processed: int, output_path
 - **severity Accuracy**: {metrics.get('severity', 0):.2%}
 
 ## Strategy Used
-- **Model**: GPT-4o with structured JSON outputs.
+- **Model**: Groq Llama 4 Vision (meta-llama/llama-4-scout-17b-16e-instruct) with structured JSON outputs.
 - **Prompting**: Object-specific instructions, injecting user history and evidence requirements.
 
 ## Operational Analysis
 - **Model Calls**: 1 call per claim.
 - **Token Usage**: ~500 input text tokens, plus image token encoding costs (~1000 tokens per image). Output ~150 tokens.
-- **Images Processed**: Depends on the claim, encoded as base64.
-- **Cost Estimate**: At $5/M input and $15/M output for GPT-4o, cost is roughly $0.01 per claim.
-- **Latency**: ~3-5 seconds per claim.
+- **Images Processed**: Depends on the claim, encoded as base64 and compressed to max 1024x1024 to save tokens and avoid payload limits.
+- **Cost Estimate**: At $0.11/M input and $0.34/M output for Llama 4, cost is roughly $0.0002 per claim (approx. $0.01 for the entire dataset).
+- **Latency**: ~1.5 to 2 seconds per claim.
 - **Rate Limits**: Synchronous processing ensures we don't hit RPM/TPM limits on standard tiers, though batching could speed this up for larger datasets.
 """
     try:
@@ -64,3 +64,4 @@ def generate_report(metrics: Dict[str, float], total_processed: int, output_path
             f.write(report)
     except Exception as e:
         print(f"Error writing report: {e}")
+

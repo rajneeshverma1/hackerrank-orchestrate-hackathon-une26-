@@ -11,7 +11,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Assuming OPENAI_API_KEY is set in environment
-client = OpenAI()
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENAI_API_KEY"),
+)
 
 def process_claim(row: Dict[str, str], user_history_dict: Dict[str, str], requirements_dict: Dict[str, str], repo_root: str) -> Dict[str, Any]:
     user_id = row['user_id']
@@ -57,7 +60,7 @@ def process_claim(row: Dict[str, str], user_history_dict: Dict[str, str], requir
     for attempt in range(max_retries):
         try:
             completion = client.beta.chat.completions.parse(
-                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                model="openai/gpt-4o-mini",
                 messages=messages,
                 response_format=ClaimPrediction,
                 temperature=0.0
